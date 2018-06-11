@@ -44,9 +44,9 @@ void generate_normal_data(point * data, point * centroids, long number_of_cluste
 
 	for (int c = 0; c < number_of_clusters; c++)
 	{
-		std::normal_distribution<float> nd_x(centroids[c].x, 2);
-		std::normal_distribution<float> nd_y(centroids[c].y, 2);
-		std::normal_distribution<float> nd_z(centroids[c].y, 2);
+		std::normal_distribution<float> nd_x(centroids[c].x, 0.01);
+		std::normal_distribution<float> nd_y(centroids[c].y, 0.01);
+		std::normal_distribution<float> nd_z(centroids[c].z, 0.01);
 		for (int i = 0; i < cluster_volume[c]; i++)
 		{
 			data[counter].x = nd_x(de);
@@ -175,22 +175,43 @@ int main()
 
 	//define centroids
 	point centroids[number_of_clusters];
-	//	generate_random_centroids(centroids, number_of_clusters);
-	centroids[0].x = 50;
-	centroids[0].y = 50;
-	centroids[0].z = 50;
-	centroids[1].x = 200;
-	centroids[1].y = 200;
-	centroids[1].z = 200;
-	centroids[2].x = 300;
-	centroids[2].y = 300;
-	centroids[2].z = 300;
+		
+	//centroids[0].x = 50;
+	//centroids[0].y = 50;
+	//centroids[0].z = 50;
+	//centroids[1].x = 200;
+	//centroids[1].y = 200;
+	//centroids[1].z = 200;
+	//centroids[2].x = 300;
+	//centroids[2].y = 300;
+	//centroids[2].z = 300;
+
+	//centroids[0].x = 50;
+	//centroids[0].y = 20;
+	//centroids[0].z = 30;
+	//centroids[1].x = 0;
+	//centroids[1].y = 0;
+	//centroids[1].z = 0;
+	//centroids[2].x = -20;
+	//centroids[2].y = -20;
+	//centroids[2].z = -30;
+
+	centroids[0].x = 0.5;
+	centroids[0].y = 0.5;
+	centroids[0].z = 0.5;
+	centroids[1].x = 0;
+	centroids[1].y = 0;
+	centroids[1].z = 0;
+	centroids[2].x = -0.5;
+	centroids[2].y = -0.5;
+	centroids[2].z = -0.5;
 
 	//define data
 	point * data = new point[number_of_data];
 
 	//	generate_random_data(data, number_of_data, number_of_clusters);
 	generate_normal_data(data, centroids, number_of_clusters, cluster_volume);
+	generate_random_centroids(centroids, number_of_clusters);
 
 
 
@@ -209,7 +230,7 @@ int main()
 	print_centroids(centroids, number_of_clusters, cluster_volume);
 
 
-	for (long i = 0; i < 10; i++)
+	for (long i = 0; i < 20; i++)
 	{
 		//update
 		update_cluster_label << <number_of_data / 1024 + 1, 1024 >> >(d_data, d_centroids, number_of_data, number_of_clusters);
