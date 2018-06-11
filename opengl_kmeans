@@ -107,7 +107,8 @@ struct color_table
 
 color_table *ct;
 
-long number_of_data = 9000;
+long number_of_data = 3000;
+std::default_random_engine de(time(0));
 
 
 // mouse controls
@@ -155,9 +156,24 @@ const char *sSDKsample = "simpleGL (VBO)";
 
 //kmeans part
 
+void generate_random_data(point * data, point * centroids, long number_of_data, long number_of_clusters)
+{
+	
+	for (long i = 0; i < number_of_data; i++)
+	{
+		data[i].c = rand() % number_of_clusters;
+		int cc = rand() % number_of_clusters;
+		data[i].x = float(rand()) / RAND_MAX + centroids[cc].x;
+		data[i].y = float(rand()) / RAND_MAX + centroids[cc].y;
+		data[i].z = float(rand()) / RAND_MAX + centroids[cc].z;
+		
+	}
+}
+
+
 void generate_random_centroids(point * centroids, long number_of_clusters)
 {
-	srand(time(0));
+
 	for (long i = 0; i < number_of_clusters; i++)
 	{
 		centroids[i].x = float(rand()) / RAND_MAX;
@@ -166,41 +182,52 @@ void generate_random_centroids(point * centroids, long number_of_clusters)
 	}
 }
 
+//void generate_normal_data(point * data, point * centroids, long number_of_clusters, long * cluster_volume)
+//{
+//	
+//	std::normal_distribution<float> nd_x(0, 0.01);
+//	std::normal_distribution<float> nd_y(0, 0.01);
+//	std::normal_distribution<float> nd_z(0, 0.01);
+//
+//
+//	for (int i = 0; i < number_of_data; i++)
+//	{
+//		data[i].c = rand() % number_of_clusters;
+//		int cc = rand() % number_of_clusters;
+//		cluster_volume[data[i].c] += 1;
+//		data[i].x = nd_x(de) + centroids[cc].x;
+//		data[i].y = nd_y(de) + centroids[cc].y;
+//		data[i].z = nd_z(de) + centroids[cc].z;
+//	}
+//
+//}
+
+
 void generate_normal_data(point * data, point * centroids, long number_of_clusters, long * cluster_volume)
 {
 	std::default_random_engine de(time(0));
-	srand(time(0));
+	long counter = 0;
 
-
-	for (int i = 0; i < number_of_data; i++)
+	for (int c = 0; c < number_of_clusters; c++)
 	{
-		data[i].c = rand() % number_of_clusters;
-		cluster_volume[data[i].c] += 1;
-		std::normal_distribution<float> nd_x(centroids[data[i].c].x, 0.1);
-		std::normal_distribution<float> nd_y(centroids[data[i].c].y, 0.1);
-		std::normal_distribution<float> nd_z(centroids[data[i].c].z, 0.1);
-		data[i].x = nd_x(de);
-		data[i].y = nd_y(de);
-		data[i].z = nd_z(de);
+		std::normal_distribution<float> nd_x(centroids[c].x, 0.1);
+		std::normal_distribution<float> nd_y(centroids[c].y, 0.1);
+		std::normal_distribution<float> nd_z(centroids[c].z, 0.1);
+		for (int i = 0; i < cluster_volume[c]; i++)
+		{
+			data[counter].x = nd_x(de);
+			data[counter].y = nd_y(de);
+			data[counter].z = nd_z(de);
+			counter++;
+		}
+
+
 	}
 
-	//for (int c = 0; c < number_of_clusters; c++)
-	//{
-
-	//	for (int i = 0; i < cluster_volume[c]; i++)
-	//	{
-	//		data[counter].x = nd_x(de);
-	//		data[counter].y = nd_y(de);
-	//		data[counter].z = nd_z(de);
-	//		data[counter].c = rand() % number_of_clusters;
-	//		//data[counter].c = c;
-	//		counter++;
-	//	}
-
-
-	//}
-
 }
+
+
+
 
 
 
@@ -273,6 +300,7 @@ void data2Vertex(point * data, SVertex * Vertices, long number_of_data, color_ta
 		Vertices[i].r = ct[data[i].c].r;
 		Vertices[i].g = ct[data[i].c].g;
 		Vertices[i].b = ct[data[i].c].b;
+		
 	}
 
 
@@ -330,7 +358,6 @@ int main(int argc, char **argv)
 
 	//generate number of data
 
-	srand(time(0));
 
 	const long number_of_clusters = 3;
 	long cluster_volume[number_of_clusters] = { 0 };
@@ -344,23 +371,41 @@ int main(int argc, char **argv)
 	}
 
 
+
+
 	//define centroids
 	point centroids[number_of_clusters];
 	//	generate_random_centroids(centroids, number_of_clusters);
-	centroids[0].x = 0.5;
-	centroids[0].y = 0.5;
-	centroids[0].z = 0.5;
+	//centroids[0].x = 0.5;
+	//centroids[0].y = 0.5;
+	//centroids[0].z = 0.5;
+	//centroids[1].x = 0;
+	//centroids[1].y = 0;
+	//centroids[1].z = 0;
+	//centroids[2].x = -1;
+	//centroids[2].y = -1;
+	//centroids[2].z = -1;
+	centroids[0].x = 50;
+	centroids[0].y = 20;
+	centroids[0].z = 30;
 	centroids[1].x = 0;
 	centroids[1].y = 0;
 	centroids[1].z = 0;
-	centroids[2].x = -0.5;
-	centroids[2].y = -0.5;
-	centroids[2].z = -0.5;
+	centroids[2].x = -20;
+	centroids[2].y = -20;
+	centroids[2].z = -30;
 
 	////define data
 	point * data = new point[number_of_data];
 
-	//	generate_random_data(data, number_of_data, number_of_clusters);
+	////generat random colors
+	for (int i = 0; i < number_of_data; i++)
+	{
+		data[i].c = rand() % number_of_clusters;
+		cluster_volume[data[i].c] ++;
+	}
+
+	//generate_random_data(data, centroids,number_of_data, number_of_clusters);
 	generate_normal_data(data, centroids, number_of_clusters, cluster_volume);
 
 	for (int c = 0; c < number_of_clusters; c++)
@@ -375,35 +420,36 @@ int main(int argc, char **argv)
 
 	// create Vertices
 	Vertices = new SVertex[number_of_data];
-	data2Vertex(data, Vertices, number_of_data, ct);
+	//data2Vertex(data, Vertices, number_of_data, ct);
+	//print_data(data, number_of_data);
 
 
 	////	define cuda data
-	//point * d_data;
-	//cudaMalloc(&d_data, sizeof(point) * number_of_data);
-	//cudaMemcpy(d_data, data, sizeof(point) * number_of_data, cudaMemcpyHostToDevice);
+	point * d_data;
+	cudaMalloc(&d_data, sizeof(point) * number_of_data);
+	cudaMemcpy(d_data, data, sizeof(point) * number_of_data, cudaMemcpyHostToDevice);
 
-	////define cuda cnetroids
-	//point * d_centroids;
-	//cudaMalloc(&d_centroids, sizeof(point) * number_of_clusters);
-	//cudaMemcpy(d_centroids, centroids, sizeof(point) * number_of_clusters, cudaMemcpyHostToDevice);
+	//define cuda cnetroids
+	point * d_centroids;
+	cudaMalloc(&d_centroids, sizeof(point) * number_of_clusters);
+	cudaMemcpy(d_centroids, centroids, sizeof(point) * number_of_clusters, cudaMemcpyHostToDevice);
 
-	////	print_data(data, number_of_data);
-	//print_centroids(centroids, number_of_clusters, cluster_volume);
+	//	print_data(data, number_of_data);
+	print_centroids(centroids, number_of_clusters, cluster_volume);
 
 
-	//for (long i = 0; i < 10; i++)
-	//{
-	//	//update
-	//	update_cluster_label << <number_of_data / 1024 + 1, 1024 >> >(d_data, d_centroids, number_of_data, number_of_clusters);
-	//	cudaMemcpy(data, d_data, sizeof(point) * number_of_data, cudaMemcpyDeviceToHost);
-	//	update_centroids(data, centroids, cluster_volume, number_of_data, number_of_clusters);
-	//	printf("iteration %d:\n\n", i);
-	//	
-	//	print_centroids(centroids, number_of_clusters, cluster_volume);
-	//	cudaMemcpy(d_centroids, centroids, sizeof(point) * number_of_clusters, cudaMemcpyHostToDevice);
-	//}
-	//data2Vertex(data, Vertices, number_of_data, ct);
+	for (long i = 0; i < 10; i++)
+	{
+		//update
+		update_cluster_label << <number_of_data / 1024 + 1, 1024 >> >(d_data, d_centroids, number_of_data, number_of_clusters);
+		cudaMemcpy(data, d_data, sizeof(point) * number_of_data, cudaMemcpyDeviceToHost);
+		update_centroids(data, centroids, cluster_volume, number_of_data, number_of_clusters);
+		printf("iteration %d:\n\n", i);
+		
+		print_centroids(centroids, number_of_clusters, cluster_volume);
+		cudaMemcpy(d_centroids, centroids, sizeof(point) * number_of_clusters, cudaMemcpyHostToDevice);
+	}
+	data2Vertex(data, Vertices, number_of_data, ct);
 	// start rendering mainloop
 
 	glutMainLoop();
