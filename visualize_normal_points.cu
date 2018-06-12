@@ -86,8 +86,8 @@ const unsigned int window_height = 1024;
 const unsigned int mesh_width = 256;
 const unsigned int mesh_height = 256;
 
-const long number_of_data = 60000;
-const long number_of_clusters = 10;
+const long number_of_data = 600000;
+const long number_of_clusters = 100;
 
 
 
@@ -341,9 +341,12 @@ int main(int argc, char **argv)
 
 	// generate normal distribution
 	std::default_random_engine de(time(0));
-	std::normal_distribution<float> nd_x(0, 0.3);
-	std::normal_distribution<float> nd_y(0, 0.3);
-	std::normal_distribution<float> nd_z(0, 0.3);
+	//std::normal_distribution<float> nd_x(0, 0.08);
+	//std::normal_distribution<float> nd_y(0, 0.08);
+	//std::normal_distribution<float> nd_z(0, 0.08);
+	std::normal_distribution<float> nd_x(0, float(rand()) / RAND_MAX);
+	std::normal_distribution<float> nd_y(0, float(rand()) / RAND_MAX);
+	std::normal_distribution<float> nd_z(0, float(rand()) / RAND_MAX);
 	for (int i = 0; i < number_of_data; i++)
 	{
 		int c = rand() % number_of_clusters;
@@ -402,15 +405,17 @@ int main(int argc, char **argv)
 	
 	// start rendering mainloop
 	data2vertex(data, Vertices, color_table);
+	display();
+	Sleep(10000);
 
-	for (long i = 0; i < 20; i++)
+	for (long i = 0; i < 50; i++)
 	{
 		//update
 			
 			data2vertex(data, Vertices, color_table);
 			centroids2vertex(centroids, Vertices_centroids);
 			display();
-			Sleep(500);
+			Sleep(1000);
 			//display_centroids();
 			update_cluster_label << <number_of_data / 1024 + 1, 1024 >> > (d_data, d_centroids, number_of_data, number_of_clusters);
 			cudaMemcpy(data, d_data, sizeof(point) * number_of_data, cudaMemcpyDeviceToHost);
@@ -517,8 +522,10 @@ void display()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0.0, 0.0, translate_z);
-	glRotatef(0, 1.0, 0.0, 0.0);
-	glRotatef(time(0)%360, 0.0, 1.0, 0.0);
+	//glTranslatef(0.0, 0.0, 0);
+	glRotatef(rotate_x, 1.0, 0.0, 0.0);
+	glRotatef(rotate_y, 0.0, 1.0, 0.0);
+
 
 	// render from the vbo
 	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -553,7 +560,7 @@ void display()
 		sizeof(SVertex),
 		&Vertices_centroids[0].r);
 
-	glPointSize(5.0);
+	glPointSize(4.0);
 	glDrawArrays(GL_POINTS, 0, number_of_clusters);
 
 
